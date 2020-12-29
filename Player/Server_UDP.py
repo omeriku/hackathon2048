@@ -27,14 +27,15 @@ def create_msg():
 def start_UDP_server():
     print(f"Server started, listening on IP address {HOST}")
     message = create_msg()
-    start_time = 0
-    while start_time < 30: #Todo change to 10 and handle timeout
+    now = time.time()
+    future = now + 10
+    while time.time() < future: #Todo change to 10 and handle timeout
         cs = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         cs.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         cs.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         cs.sendto(message, ('255.255.255.255', PORT))
         time.sleep(1)
-        start_time += 1
+        print("BROADCAST Now")
 
 # start_UDP_server()
 

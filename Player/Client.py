@@ -33,14 +33,14 @@ def start_Client_UDP():
     print("Received offer from", server_addr, ", attempting to connect...")
     startTCP(server_addr)
 
-def send(msg, client):
+def send(msg, sender):
     message = msg.encode(FORMAT)
     msg_length = len(message)
     send_length = str(msg_length).encode(FORMAT)
     send_length += b' ' * (1024 - len(send_length))
-    client.send(send_length)
-    client.send(message)
-    print(client.recv(2048).decode(FORMAT))
+    sender.send(send_length)
+    sender.send(message)
+    print(sender.recv(2048).decode(FORMAT))
 
 def startTCP(addr):
 
@@ -52,7 +52,10 @@ def startTCP(addr):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect(ADDR)
 
-    send("BBZNOT\n", client)
+    send("Hello Kitty", client)
+
+    print(client.recv(2048).decode(FORMAT))
+
 
 
 
