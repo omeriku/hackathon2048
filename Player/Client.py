@@ -43,19 +43,17 @@ def send(msg, client):
     print(client.recv(2048).decode(FORMAT))
 
 def startTCP(addr):
-    PORT = addr[1]
+
     FORMAT = 'utf-8'
     DISCONNECT_MESSAGE = "!DISCONNECT"
-    SERVER = addr[0]
-    ADDR = (SERVER, PORT)
+    ADDR = addr
     print("this is address ", ADDR)
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect(ADDR)
 
-    send("Tzevet Rocket\n", client)
+    send("BBZNOT\n", client)
 
-    send(DISCONNECT_MESSAGE, client)
 
 
 start_Client_UDP()
