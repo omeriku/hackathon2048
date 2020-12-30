@@ -15,7 +15,7 @@ FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
 START_MESSAGE = ""
 score_dict = {}
-
+final_text = ""
 def handle_client(conn, addr, teams, event):
 
     try:
@@ -47,9 +47,11 @@ def handle_client(conn, addr, teams, event):
             except:
                 break
         print("!!!!!!!!!!! done receiving !!!!!!!!!!!!!!!!!")
-        # event.wait()
-        conn.send((f"The Game is over thank you {name}").encode(FORMAT))
-        # time.sleep(5)
+
+        event.wait()
+        conn.send(final_text.encode(FORMAT))
+
+        # conn.send((f"The Game is over thank you {name}").encode(FORMAT))
         conn.close()
     except ConnectionResetError:
         print("client ", addr, "disconnected...")
@@ -114,7 +116,12 @@ def start_TCP_server():
 
     time.sleep(10) #Todo change
     # event.set()
-    calculate_game(one_group,two_group)
+    global final_text
+    final_text = calculate_game(one_group,two_group)
+    event.set()
+    # for c in all_clients:
+    #     c.send(final_text.encode(FORMAT))
+    #     c.close()
 
     print("Game over, sending out offer requests...")
 
@@ -139,8 +146,7 @@ def calculate_game(group_a, group_b):
     text_to_print = "Game over!\nGroup1 typed in " + str(sumA) + " characters. Group2 typed in " + str(sumB) + \
                     " characters.\n" + "Group" + winner + " wins!\n\nCongratulations to the winners\n=="
 
-    print(text_to_print)
-
     for w in list_winner:
-        print(w)
+        text_to_print += w + "\n"
+    return text_to_print
 

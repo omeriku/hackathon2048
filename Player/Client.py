@@ -90,10 +90,10 @@ def startTCP(addr):
         future = now + 10
 
         while time.time() < future:
-            key = getch()
-            client.send(key)
-            # client.send("a".encode())
-            # time.sleep(1)
+            # key = getch()
+            # client.send(key)
+            client.send("a".encode())
+            time.sleep(1)
         print("done sending")
         print(client.recv(1024).decode())
         print("Server disconnected, listening for offer requests...")
