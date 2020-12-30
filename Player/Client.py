@@ -8,6 +8,9 @@ import struct
 # HOST = '172.1.0.48'  # The server's hostname or IP address
 
 # HOST = '192.168.50.174' #Todo change
+import time
+from msvcrt import getch
+
 PORT = 13117        # The port used by the server
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
@@ -55,6 +58,19 @@ def startTCP(addr):
     send("Hello Kitty", client)
 
     print(client.recv(2048).decode(FORMAT))
+
+    running = True
+    print("client Type !!!!!!!!!!!!!!")
+    now = time.time()
+    future = now + 10
+    while time.time() < future:
+        key = getch()
+        send(key, client)
+
+    print(client.recv(1024).decode())
+
+
+
 
 
 

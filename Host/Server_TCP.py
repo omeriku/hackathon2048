@@ -3,7 +3,7 @@ import socket
 import threading
 import time
 
-from Game import divide_to_groups
+from Game import *
 from Player.Server_UDP import start_UDP_server
 from threading import Thread
 
@@ -15,11 +15,7 @@ FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
 
 
-
-teams = {}
-all_clients = []
-
-def handle_client(conn, addr):
+def handle_client(conn, addr, teams):
     print(f"[NEW CONNECTION] {addr} connected.") #Todo delete prints
 
     # connected = True
@@ -35,20 +31,21 @@ def handle_client(conn, addr):
 
     # conn.close()
 
-def startGame():
+def startAllServers():
     print(f"This is TCP Server started, IP and Port {ADDR}")
     while 1:
         t_tcp = Thread(target=start_TCP_server)
         t_udp = Thread(target=start_UDP_server)
 
-        t_tcp.start()
         t_udp.start()
+        t_tcp.start()
 
         t_udp.join()
         t_tcp.join()
 
 def start_TCP_server():
-
+    teams = {}
+    all_clients = []
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(ADDR)
     server.listen()
@@ -58,7 +55,7 @@ def start_TCP_server():
         try:
             conn, addr = server.accept()
             all_clients.append(conn)
-            thread = threading.Thread(target=handle_client, args=(conn, addr))
+            thread = threading.Thread(target=handle_client, args=(conn, addr, teams))
             thread.start()
             print(f"\n[ACTIVE CONNECTIONS] {threading.activeCount() - 3}")
         except socket.timeout as e:
@@ -79,17 +76,18 @@ def start_TCP_server():
     # print(welcome_msg)
 
     message = welcome_msg.encode(FORMAT)
-    msg_length = len(message)
-    send_length = str(msg_length).encode(FORMAT)
-    send_length += b' ' * (1024 - len(send_length))
+    # msg_length = len(message)
+    # send_length = str(msg_length).encode(FORMAT)
+    # send_length += b' ' * (1024 - len(send_length))
 
     for group in all_clients:
-        # server.sendto(send_length, group)
         group.send(message)
     print("now the game")
-    time.sleep(15)
+    startGame(one_group, two_group, all_clients, server)
+    # time.sleep(15)
 
-    print("15 sec over")
+    print("Game over, sending out offer requests...")
+
 
 
 
