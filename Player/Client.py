@@ -14,7 +14,7 @@ import termios
 
 # HOST = '192.168.50.174' #Todo change
 import time
-from msvcrt import getch
+# from msvcrt import getch
 
 PORT = 13117        # The port usedf by the server
 FORMAT = 'utf-8'
