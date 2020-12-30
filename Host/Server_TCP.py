@@ -6,11 +6,10 @@ import random
 from Player.Server_UDP import start_UDP_server
 from threading import Thread
 from scapy.arch import get_if_addr
+SERVER = get_if_addr('eth1')
 
-# HEADER = 64
 PORT = 5080
 # SERVER = socket.gethostbyname(socket.gethostname())
-SERVER = get_if_addr('eth1')
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
@@ -62,7 +61,7 @@ def handle_client(conn, addr, teams, event, done_event):
 
 
 def startAllServers():
-    # print(f"This is TCP Server started, IP and Port {ADDR}")
+    print(f"This is TCP Server started, IP and Port {ADDR}")
     while 1:
         t_tcp = Thread(target=start_TCP_server)
         t_udp = Thread(target=start_UDP_server)
@@ -94,9 +93,9 @@ def start_TCP_server():
             all_clients.append(conn)
             thread = threading.Thread(target=handle_client, args=(conn, addr, teams, event, done_event))
             thread.start()
-            # print(f"\n[ACTIVE CONNECTIONS] {len(all_clients)}")
+            print(f"\n[ACTIVE CONNECTIONS] {len(all_clients)}")
         except:
-            # print("done waiting for client")
+            print("done waiting for client")
             break
             # server.close()
 
