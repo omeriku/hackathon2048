@@ -20,8 +20,8 @@ server.bind(ADDR)
 def create_msg():
     magic_cookie = int('feedbeef', 16)
     message_type = int('2', 16)
-    server_port = int(47980)
-    return struct.pack('!III', magic_cookie, message_type, server_port)
+    server_port = int(5080)
+    return struct.pack('!Ibh', magic_cookie, message_type, server_port)
 
 
 def start_UDP_server():
@@ -34,8 +34,8 @@ def start_UDP_server():
         cs.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         cs.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         cs.sendto(message, ('255.255.255.255', PORT))
-        time.sleep(1)
         print("BROADCAST Now")
+        time.sleep(1)
 
 # start_UDP_server()
 
