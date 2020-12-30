@@ -1,14 +1,14 @@
 
 
 #!/usr/bin/env python3
-
+import msvcrt
 import socket
 import struct
 
-import sys
-import select
-import tty
-import termios
+# import sys
+# import select
+# import tty
+# import termios
 
 # try push
 # HOST = '172.1.0.48'  # The server's hostname or IP address
@@ -85,18 +85,19 @@ def startTCP(addr):
 
 
 
-        typeHandler(client)
+        # typeHandler(client)
 
         # print("client Type !!!!!!!!!!!!!!")
-        # now = time.time()
-        # future = now + 10
-        #
-        # while time.time() < future:
-        #     key = getch()
-        #     client.send(key)
+        now = time.time()
+        future = now + 10
+
+        while time.time() < future:
+            if msvcrt.kbhit():
+                key = msvcrt.getch()
+                client.send(key)
             # client.send("a".encode())
             # time.sleep(1)
-        # print("done sending")
+        print("done sending")
         print(client.recv(1024).decode())
         print("Server disconnected, listening for offer requests...")
 
@@ -105,65 +106,6 @@ def startTCP(addr):
         return
 
 
-
-
-def isData():
-    return select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], [])
-
-def typeHandler(client):
-    old_settings = termios.tcgetattr(sys.stdin)
-    try:
-        tty.setcbreak(sys.stdin.fileno())
-
-        now = time.time()
-        future = now + 10
-
-        while time.time() < future:
-            if isData():
-                c = sys.stdin.read(1)
-                client.send(c)
-                # if c == '\x1b':  # x1b is ESC
-                #     break
-
-    finally:
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
-
-
-
 startPlayer()
 
 
-
-
-
-
-
-
-
-# send("Hello World!")
-# send("Hello Everyone!")
-# send("0xfeedbeef")
-
-# magic_cookie = "{0:08b}".format(int("0xfeedbeef", 16))
-# message_type = "{0:08b}".format(int("0x2", 16))
-# server_port = "{0:08b}".format(int("BB6C", 16))  # 47980 port in hex is BB6C
-#
-# message_2 = magic_cookie + message_type + server_port
-# byte_message = str.encode(message)
-
-
-# mmm = create_msg()
-# send(mmm)
-
-
-# send(DISCONNECT_MESSAGE)
-
-
-
-# with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-#     s.connect((HOST, PORT))
-#
-#     s.sendall(b'Hello, world')
-#     data = s.recv(1024)
-#
-# print('Received', repr(data))

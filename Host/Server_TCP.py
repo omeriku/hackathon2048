@@ -2,14 +2,13 @@ import socket
 import threading
 import time
 import random
-# from Game import *
 from Player.Server_UDP import start_UDP_server
 from threading import Thread
-from scapy.arch import get_if_addr
-SERVER = get_if_addr('eth1')
+# from scapy.arch import get_if_addr
+# SERVER = get_if_addr('eth1')
 
 PORT = 5080
-# SERVER = socket.gethostbyname(socket.gethostname())
+SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
