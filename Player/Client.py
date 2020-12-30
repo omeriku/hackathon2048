@@ -5,6 +5,11 @@
 import socket
 import struct
 
+import sys
+import select
+import tty
+import termios
+
 # HOST = '172.1.0.48'  # The server's hostname or IP address
 
 # HOST = '192.168.50.174' #Todo change
@@ -77,15 +82,19 @@ def startTCP(addr):
 
         print(client.recv(1024).decode(FORMAT))
 
-        # print("client Type !!!!!!!!!!!!!!")
-        now = time.time()
-        future = now + 10
 
-        while time.time() < future:
-            # key = getch()
-            # client.send(key)
-            client.send("a".encode())
-            time.sleep(1)
+
+        typeHandler(client)
+
+        # print("client Type !!!!!!!!!!!!!!")
+        # now = time.time()
+        # future = now + 10
+        #
+        # while time.time() < future:
+        #     key = getch()
+        #     client.send(key)
+            # client.send("a".encode())
+            # time.sleep(1)
         # print("done sending")
         print(client.recv(1024).decode())
         print("Server disconnected, listening for offer requests...")
@@ -95,7 +104,38 @@ def startTCP(addr):
         return
 
 
+
+
+def isData():
+    return select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], [])
+
+def typeHandler(client):
+    old_settings = termios.tcgetattr(sys.stdin)
+    try:
+        tty.setcbreak(sys.stdin.fileno())
+
+        now = time.time()
+        future = now + 10
+
+        while time.time() < future:
+            if isData():
+                c = sys.stdin.read(1)
+                client.send(c)
+                # if c == '\x1b':  # x1b is ESC
+                #     break
+
+    finally:
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+
+
+
 startPlayer()
+
+
+
+
+
+
 
 
 
