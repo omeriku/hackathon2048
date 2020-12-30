@@ -10,6 +10,7 @@ import select
 import tty
 import termios
 
+# try push
 # HOST = '172.1.0.48'  # The server's hostname or IP address
 
 # HOST = '192.168.50.174' #Todo change

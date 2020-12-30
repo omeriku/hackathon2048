@@ -5,10 +5,12 @@ import random
 # from Game import *
 from Player.Server_UDP import start_UDP_server
 from threading import Thread
+from scapy.arch import get_if_addr
 
 # HEADER = 64
 PORT = 5080
-SERVER = socket.gethostbyname(socket.gethostname())
+# SERVER = socket.gethostbyname(socket.gethostname())
+SERVER = get_if_addr('eth1')
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"

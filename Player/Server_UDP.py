@@ -7,8 +7,10 @@
 import struct
 import socket
 import time
+from scapy.arch import get_if_addr
 
-HOST = socket.gethostbyname(socket.gethostname())  # Standard loopback interface address 172.1.0.48
+# HOST = socket.gethostbyname(socket.gethostname())  # Standard loopback interface address 172.1.0.48
+HOST = get_if_addr('eth1')
 PORT = 13117        # Port to listen on (non-privileged ports are > 1023)
 ADDR = (HOST, PORT)
 FORMAT = 'utf-8'
