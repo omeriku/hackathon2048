@@ -52,40 +52,32 @@ def start_Client_UDP():
             client.close()
 
     # client.connect(addr)
-    print("Received offer from", addr[0], ", attempting to connect...")
-    print(msg)
-    unpacked_msg = struct.unpack('!Ibh', msg)
-    print(unpacked_msg)
-    server_addr = (addr[0], unpacked_msg[2])
-    print("Received offer from", server_addr, ", attempting to connect...")
 
+    # print(msg)
+    unpacked_msg = struct.unpack('!Ibh', msg)
+    # print(unpacked_msg)
+    server_addr = (addr[0], unpacked_msg[2])
+    # print("Received offer from", server_addr, ", attempting to connect...")
+
+    print("Received offer from", addr[0], ", attempting to connect...")
     startTCP(server_addr)
 
-def send(msg, sender):
-    message = msg.encode(FORMAT)
-    # msg_length = len(message)
-    # send_length = str(msg_length).encode(FORMAT)
-    # send_length += b' ' * (1024 - len(send_length))
-    # sender.send(send_length)
-    sender.send(message)
-    print(sender.recv(1024).decode(FORMAT))
 
 def startTCP(addr):
     try:
         FORMAT = 'utf-8'
         DISCONNECT_MESSAGE = "!DISCONNECT"
         ADDR = addr
-        print("this is address ", ADDR)
+        # print("this is address ", ADDR)
 
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect(ADDR)
 
-        send("Hello Kitty", client)
+        client.send("BAMBA".encode(FORMAT))
 
         print(client.recv(1024).decode(FORMAT))
 
-        running = True
-        print("client Type !!!!!!!!!!!!!!")
+        # print("client Type !!!!!!!!!!!!!!")
         now = time.time()
         future = now + 10
 
@@ -94,7 +86,7 @@ def startTCP(addr):
             # client.send(key)
             client.send("a".encode())
             time.sleep(1)
-        print("done sending")
+        # print("done sending")
         print(client.recv(1024).decode())
         print("Server disconnected, listening for offer requests...")
 

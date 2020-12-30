@@ -34,7 +34,7 @@ def start_UDP_server():
         cs.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         cs.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         cs.sendto(message, ('255.255.255.255', PORT))
-        print("BROADCAST Now")
+        # print("BROADCAST Now")
         time.sleep(1)
 
 # start_UDP_server()

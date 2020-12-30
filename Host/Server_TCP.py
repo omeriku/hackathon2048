@@ -1,9 +1,8 @@
-import signal
 import socket
 import threading
 import time
-
-from Game import *
+import random
+# from Game import *
 from Player.Server_UDP import start_UDP_server
 from threading import Thread
 
@@ -16,17 +15,19 @@ DISCONNECT_MESSAGE = "!DISCONNECT"
 START_MESSAGE = ""
 score_dict = {}
 final_text = ""
-def handle_client(conn, addr, teams, event):
+
+
+def handle_client(conn, addr, teams, event, done_event):
 
     try:
 
-        print(f"[NEW CONNECTION] {addr} connected.") #Todo delete prints
+        # print(f"[NEW CONNECTION] {addr} connected.") #Todo delete prints
         name = conn.recv(1024).decode(FORMAT)
 
         print(f"[{addr}] {name}")
         teams[addr] = name
         # conn.send()
-        conn.send((f"Your Team {name} in the game").encode(FORMAT))
+        # conn.send((f"Your Team {name} in the game").encode(FORMAT))
         global score_dict
         score_dict[addr] = 0
 
@@ -36,7 +37,7 @@ def handle_client(conn, addr, teams, event):
         now = time.time()
         future = now + 10
         # conn.settimeout(10)
-        print("GAME START TYPE !!!!!!")
+        print("GAME START !!!!!!")
         # while time.time() < future:
         while 1:
             try:
@@ -46,9 +47,10 @@ def handle_client(conn, addr, teams, event):
                 score_dict[addr] += 1
             except:
                 break
-        print("!!!!!!!!!!! done receiving !!!!!!!!!!!!!!!!!")
+        # print("!!!!!!!!!!! done receiving !!!!!!!!!!!!!!!!!")
 
-        event.wait()
+        done_event.wait()
+
         conn.send(final_text.encode(FORMAT))
 
         # conn.send((f"The Game is over thank you {name}").encode(FORMAT))
@@ -56,8 +58,9 @@ def handle_client(conn, addr, teams, event):
     except ConnectionResetError:
         print("client ", addr, "disconnected...")
 
+
 def startAllServers():
-    print(f"This is TCP Server started, IP and Port {ADDR}")
+    # print(f"This is TCP Server started, IP and Port {ADDR}")
     while 1:
         t_tcp = Thread(target=start_TCP_server)
         t_udp = Thread(target=start_UDP_server)
@@ -81,16 +84,17 @@ def start_TCP_server():
     server.settimeout(10)
 
     event = threading.Event()
+    done_event = threading.Event()
 
     while 1:
         try:
             conn, addr = server.accept()
             all_clients.append(conn)
-            thread = threading.Thread(target=handle_client, args=(conn, addr, teams, event))
+            thread = threading.Thread(target=handle_client, args=(conn, addr, teams, event, done_event))
             thread.start()
-            print(f"\n[ACTIVE CONNECTIONS] {len(all_clients)}")
+            # print(f"\n[ACTIVE CONNECTIONS] {len(all_clients)}")
         except:
-            print("done waiting for client")
+            # print("done waiting for client")
             break
             # server.close()
 
@@ -118,7 +122,8 @@ def start_TCP_server():
     # event.set()
     global final_text
     final_text = calculate_game(one_group,two_group)
-    event.set()
+    done_event.set()
+
     # for c in all_clients:
     #     c.send(final_text.encode(FORMAT))
     #     c.close()
@@ -144,9 +149,25 @@ def calculate_game(group_a, group_b):
             list_winner.append(g[1])
         winner = "2"
     text_to_print = "Game over!\nGroup1 typed in " + str(sumA) + " characters. Group2 typed in " + str(sumB) + \
-                    " characters.\n" + "Group" + winner + " wins!\n\nCongratulations to the winners\n=="
+                    " characters.\n" + "Group" + winner + " wins!\n\nCongratulations to the winners\n==\n"
 
     for w in list_winner:
         text_to_print += w + "\n"
     return text_to_print
 
+
+def divide_to_groups(all_teams):
+    one_group = []
+    two_group = []
+    all_teams = dict(all_teams)
+    data = []
+    for address in all_teams:
+        data.append((address, all_teams[address]))
+
+    random.shuffle(data)
+    half_num_of_teams = int(len(all_teams)/2)
+
+    one_group = data[:half_num_of_teams]
+    two_group = data[half_num_of_teams:]
+
+    return one_group, two_group
