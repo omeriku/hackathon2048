@@ -23,7 +23,7 @@ def create_msg():
     magic_cookie = int('feedbeef', 16)
     message_type = int('2', 16)
     server_port = int(5080)
-    return struct.pack('!Ibh', magic_cookie, message_type, server_port)
+    return struct.pack('!IbH', magic_cookie, message_type, server_port)
 
 
 def start_UDP_server():

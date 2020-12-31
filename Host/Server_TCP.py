@@ -17,11 +17,11 @@ score_dict = {}
 final_text = ""
 
 
-def handle_client(conn, addr, teams, event, done_event):
+def handle_client(conn, addr, teams, start_event, done_event):
 
     try:
 
-        # print(f"[NEW CONNECTION] {addr} connected.") #Todo delete prints
+        # print(f"[NEW CONNECTION] {addr} connected.")
         name = conn.recv(1024).decode(FORMAT)
 
         print(f"[{addr}] {name}")
@@ -31,7 +31,7 @@ def handle_client(conn, addr, teams, event, done_event):
         global score_dict
         score_dict[addr] = 0
 
-        event.wait()
+        start_event.wait()
         conn.send(START_MESSAGE)
 
         now = time.time()
@@ -83,14 +83,14 @@ def start_TCP_server():
 
     server.settimeout(10)
 
-    event = threading.Event()
-    done_event = threading.Event()
+    start_game_event = threading.Event()
+    done_game_event = threading.Event()
 
     while 1:
         try:
             conn, addr = server.accept()
             all_clients.append(conn)
-            thread = threading.Thread(target=handle_client, args=(conn, addr, teams, event, done_event))
+            thread = threading.Thread(target=handle_client, args=(conn, addr, teams, start_game_event, done_game_event))
             thread.start()
             print(f"\n[ACTIVE CONNECTIONS] {len(all_clients)}")
         except:
@@ -116,21 +116,19 @@ def start_TCP_server():
         print("no one came ...")
         return
 
-    event.set()  # now play
+    start_game_event.set()  # now play
 
-    time.sleep(10) #Todo change
-    # event.set()
+    time.sleep(10) # game time
     global final_text
     final_text = calculate_game(one_group,two_group)
-    done_event.set()
+    done_game_event.set()
 
-    # for c in all_clients:
-    #     c.send(final_text.encode(FORMAT))
-    #     c.close()
 
     print("Game over, sending out offer requests...")
 
+
 def calculate_game(group_a, group_b):
+
     sumA=0
     sumB=0
     for team in score_dict.keys():
@@ -157,9 +155,7 @@ def calculate_game(group_a, group_b):
 
 
 def divide_to_groups(all_teams):
-    one_group = []
-    two_group = []
-    all_teams = dict(all_teams)
+
     data = []
     for address in all_teams:
         data.append((address, all_teams[address]))
