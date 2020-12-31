@@ -6,29 +6,42 @@ import time
 
 # HOST = '172.1.0.48'  # The server's hostname or IP address
 
-PORT = 13117        # The port usedf by the server
+PORT = 13117        # The port used by the server
 FORMAT = 'utf-8'
+BUFFER_SIZE = 1024
+TIME_TO_WAIT = 10
+
 
 def startPlayer():
-    # run listener on port 13117 until connection found and start tcp
+    """
+    run listener on port 13117 until connection found and start tcp
+    """""
     while 1:
         start_Client_UDP()
 
 def checkMessage(msg):
+    """
+
+    :param msg: the message got from the UDP server
+    :return: True - whether the message is valid by the format
+    """
     try:
         unpacked_msg = struct.unpack('!IbH', msg)
         translated_msg = [hex(unpacked_msg[0]), hex(unpacked_msg[1]), unpacked_msg[2]]
-        if (str(translated_msg[0]) != "0xfeedbeef"):
+        if str(translated_msg[0]) != "0xfeedbeef":
             return False
-        elif (str(translated_msg[1]) != "0x2"):
+        elif str(translated_msg[1]) != "0x2":
             return False
-        elif (type(translated_msg[2]) is not int):
+        elif type(translated_msg[2]) is not int:
             return False
     except:
         return False
     return True
 
 def start_Client_UDP():
+    """
+    listening to offer requests, and  if found and the message is valid then connect
+    """
     print("Client started, listening for offer requests...")
 
     correct = False
@@ -37,8 +50,7 @@ def start_Client_UDP():
         client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         client.bind(('', PORT))
-        # client.listen()
-        msg, addr = client.recvfrom(1024)
+        msg, addr = client.recvfrom(BUFFER_SIZE)
         correct = checkMessage(msg)
 
         if not correct:
@@ -52,18 +64,21 @@ def start_Client_UDP():
 
 
 def startTCP(addr):
+    """
+    :param addr: server address
+    creating TCP connection to the server, send the team group name, play thee game and
+    when finish the game and the server is disconnected.
+    """
     try:
-        # print("this is address ", ADDR)
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect(addr)
 
-        client.send("BAMBA".encode(FORMAT))
+        client.send("BAMBA\n".encode(FORMAT))
 
-        print(client.recv(1024).decode(FORMAT))
+        print(client.recv(BUFFER_SIZE).decode(FORMAT))
 
-        # print("client Type !!!!!!!!!!!!!!")
         now = time.time()
-        future = now + 10
+        future = now + TIME_TO_WAIT
         # the game
         while time.time() < future:
             if msvcrt.kbhit():
@@ -71,7 +86,7 @@ def startTCP(addr):
                 client.send(key)
 
         print("done sending")
-        print(client.recv(1024).decode())
+        print(client.recv(BUFFER_SIZE).decode())
         print("Server disconnected, listening for offer requests...")
 
     except ConnectionResetError:

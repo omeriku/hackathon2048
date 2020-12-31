@@ -4,30 +4,33 @@ import time
 import random
 from Player.Server_UDP import start_UDP_server
 from threading import Thread
-# from scapy.arch import get_if_addr
-# SERVER = get_if_addr('eth1')
+
 
 PORT = 5080
 SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
-DISCONNECT_MESSAGE = "!DISCONNECT"
 START_MESSAGE = ""
+BUFFER_SIZE = 1024
+TIME_TO_WAIT = 10
 score_dict = {}
 final_text = ""
 
-
 def handle_client(conn, addr, teams, start_event, done_event):
-
+    """"
+    :param
+    conn -> TCP connection
+    addr -> address
+    teams -> teams to play
+    start_event -> All Threads wait to the server to start the game
+    done_event -> All Threads wait to the server to finish the game
+    """
     try:
 
-        # print(f"[NEW CONNECTION] {addr} connected.")
-        name = conn.recv(1024).decode(FORMAT)
+        name = conn.recv(BUFFER_SIZE).decode(FORMAT)
 
         print(f"[{addr}] {name}")
         teams[addr] = name
-        # conn.send()
-        # conn.send((f"Your Team {name} in the game").encode(FORMAT))
         global score_dict
         score_dict[addr] = 0
 
@@ -35,31 +38,26 @@ def handle_client(conn, addr, teams, start_event, done_event):
         conn.send(START_MESSAGE)
 
         now = time.time()
-        future = now + 10
-        # conn.settimeout(10)
-        print("GAME START !!!!!!")
-        # while time.time() < future:
+        future = now + TIME_TO_WAIT
+
         while 1:
             try:
                 conn.settimeout(future-time.time())
-                data = conn.recv(1024).decode(FORMAT)
-                # print("received", data)
+                data = conn.recv(BUFFER_SIZE).decode(FORMAT)
                 score_dict[addr] += 1
             except:
                 break
-        # print("!!!!!!!!!!! done receiving !!!!!!!!!!!!!!!!!")
-
         done_event.wait()
-
         conn.send(final_text.encode(FORMAT))
-
-        # conn.send((f"The Game is over thank you {name}").encode(FORMAT))
         conn.close()
     except ConnectionResetError:
         print("client ", addr, "disconnected...")
 
 
 def startAllServers():
+    """"
+    servers run tcp and udp simultaneously
+    """
     print(f"This is TCP Server started, IP and Port {ADDR}")
     while 1:
         t_tcp = Thread(target=start_TCP_server)
@@ -72,6 +70,10 @@ def startAllServers():
         t_tcp.join()
 
 def start_TCP_server():
+    """"
+    Server creates new THREAD for each connection
+    Ten seconds later,send welcome message and starts the game
+    """
     teams = {}
     all_clients = []
     global score_dict
@@ -81,7 +83,7 @@ def start_TCP_server():
     server.bind(ADDR)
     server.listen()
 
-    server.settimeout(10)
+    server.settimeout(TIME_TO_WAIT)
 
     start_game_event = threading.Event()
     done_game_event = threading.Event()
@@ -96,41 +98,35 @@ def start_TCP_server():
         except:
             print("done waiting for client")
             break
-            # server.close()
 
     one_group, two_group = divide_to_groups(all_teams=teams)
 
-    welcome_msg = "Welcome to Keyboard Spamming Battle Royale.\nGroup 1:\n==\n"
-    for g in one_group:
-        welcome_msg = welcome_msg + g[1] + "\n"
-    welcome_msg += "Group 2:\n==\n"
-    for g in two_group:
-        welcome_msg = welcome_msg + g[1] + "\n"
-    welcome_msg += "\nStart pressing keys on your keyboard as fast as you can!!\n"
-    # print(welcome_msg)
-
+    # Creating Welcome message
+    welcome_msg = create_welcome_message(one_group, two_group)
     global START_MESSAGE
-    START_MESSAGE = welcome_msg.encode(FORMAT)
+    START_MESSAGE = welcome_msg.encode(FORMAT)  # inform everyone that this is the welcome message
 
-    if (len(all_clients) == 0):
+    if len(all_clients) == 0:
         print("no one came ...")
         return
 
-    start_game_event.set()  # now play
+    print("GAME START !!!!!!")
+    start_game_event.set()  # Every Thread can send the Welcome message right now, and everybody can play
 
-    time.sleep(10) # game time
+    time.sleep(TIME_TO_WAIT)
     global final_text
-    final_text = calculate_game(one_group,two_group)
+    final_text = calculate_game(one_group, two_group)  # Calculating the score game
     done_game_event.set()
-
 
     print("Game over, sending out offer requests...")
 
 
 def calculate_game(group_a, group_b):
-
-    sumA=0
-    sumB=0
+    """"
+    calculating the scores from the game and return the results
+    """
+    sumA = 0
+    sumB = 0
     for team in score_dict.keys():
         if team in group_a:
             sumA += score_dict[team]
@@ -155,7 +151,9 @@ def calculate_game(group_a, group_b):
 
 
 def divide_to_groups(all_teams):
-
+    """
+    dividing the teams into two groups
+    """
     data = []
     for address in all_teams:
         data.append((address, all_teams[address]))
@@ -167,3 +165,17 @@ def divide_to_groups(all_teams):
     two_group = data[half_num_of_teams:]
 
     return one_group, two_group
+
+def create_welcome_message(one_group, two_group):
+    """"
+    creating and return the welcome message
+    """
+
+    welcome_msg = "Welcome to Keyboard Spamming Battle Royale.\nGroup 1:\n==\n"
+    for g in one_group:
+        welcome_msg = welcome_msg + g[1] + "\n"
+    welcome_msg += "Group 2:\n==\n"
+    for g in two_group:
+        welcome_msg = welcome_msg + g[1] + "\n"
+    welcome_msg += "\nStart pressing keys on your keyboard as fast as you can!!\n"
+    return welcome_msg
